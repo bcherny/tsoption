@@ -40,7 +40,7 @@ Option(undefined)                        // None
 
 // #flatMap
 Option(3).flatMap(_ => Option(_ * 2))    // Some(6)
-Option(null).flatMap(_ => Option(_ * 2)) // None  (known at compile time too!)
+Option(null).flatMap(() => Option(2))    // None  (known at compile time too!)
 
 // #get
 Option(3).get()                          // 3
