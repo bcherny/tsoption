@@ -17,16 +17,16 @@ npm i tsoption -S
 *Note: You can use JavaScript instead of TypeScript, but it's not as fun.*
 
 ```ts
-let a = Option(3)
-  .flatMap(_ => Option(5))  // Some(5)
-  .map(_ => 'a')            // Some('a')
-  .orElse(Option('b'))      // Some('a')   -- non-string type gives a compile error
-  .getOrElse('c')           // 'a'
+let a = Option(3)                        // Some<number>(3)
+  .flatMap(_ => Option(5))               // Some<number>(5)
+  .map(_ => 'a')                         // Some<string>('a')
+  .orElse(Option('b'))                   // Some<string>('a')   (non-string type gives a compile error)
+  .getOrElse('c')                        // 'a'
 
-let b = Option('a')         // Some('a')
-  .map(() => null)          // None(null)  -- map can map to any type
-  .orElse(Option('b'))      // Some('b')   -- non-string type gives a compile error
-  .get()                    // 'b'
+let b = Option('a')                      // Some<string>('a')
+  .map(() => null)                       // None<string>(null)  (map can map to any type)
+  .orElse(Option('b'))                   // Some<string>('b')   (non-string type gives a compile error)
+  .get()                                 // 'b'
 ```
 
 ## API
