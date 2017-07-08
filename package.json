@@ -1,0 +1,26 @@
+{
+  "name": "tsoption",
+  "version": "0.1.0",
+  "description": "Correct, easy to use Option type for TypeScript",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run clean && npm run lint && tsc -d",
+    "clean": "rm -rf dist",
+    "lint": "tslint .",
+    "prepublish": "npm test",
+    "pretest": "npm run build",
+    "tdd": "npm run clean && concurrently -k 'npm run test:watch' 'npm run watch'",
+    "test": "ava",
+    "test:watch": "ava -w",
+    "watch": "tsc -w"
+  },
+  "author": "Boris Cherny <boris@performancejs.com> (https://performancejs.com)",
+  "license": "MIT",
+  "devDependencies": {
+    "ava": "^0.20.0",
+    "concurrently": "^3.5.0",
+    "tslint": "^5.5.0",
+    "typescript": "^2.4.1"
+  },
+  "dependencies": {}
+}
