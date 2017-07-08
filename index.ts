@@ -23,6 +23,14 @@ type ChainSome<T> = {
   chain<U = T>(f: (value: T) => None<U>): None<T>
 }
 
+type ApplicativeNone<T> = {
+  // ap<U>(option: None<U>): None<U>
+  ap<U, V extends Some<(value: U) => U>>(option: V): None<U>
+  constructor: {
+    of: typeof Option
+  }
+}
+
 type ApplicativeSome<T> = {
   // ap<U>(option: None<U>): None<U>
   ap<U, V extends Some<(value: U) => U>>(option: V): Some<U>
@@ -32,7 +40,7 @@ type ApplicativeSome<T> = {
 }
 
 /** @see https://github.com/fantasyland/fantasy-land#monad */
-type MonadNone<T> = FunctorNone<T> & ChainNone<T> & {
+type MonadNone<T> = ApplicativeNone<T> & FunctorNone<T> & ChainNone<T> & {
 
 }
 
@@ -79,7 +87,11 @@ export function None<T>(): None<T> {
     orElse: <U extends T>(alternative: Option<U>): any => alternative,
     toString: () => 'None',
 
-    chain: flatMap
+    ap: <U, V extends Some<(value: U) => U>>(option: V) => None<T>(),
+    chain: flatMap,
+    constructor: {
+      of: Option
+    }
   }
 }
 

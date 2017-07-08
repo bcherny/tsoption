@@ -40,6 +40,8 @@ test('None#orElse', t => t.is(Option(null).orElse(Option(3)).get(), 3))
 test('Some#toString', t => t.is(Option(3) + '', 'Some(3)'))
 test('None#toString', t => t.is(Option(null) + '', 'None'))
 
-// laws
+test('Some#ap', t => t.is(Option((x: number) => x).ap(Option(3)).get(), 3))
+test('None#ap', t => t.is(Option((x: number) => x).ap(Option(null)).getOrElse(3), 3))
 
-test('Applicative#ap', t => t.is(Option(3).ap(Option.of(x => x)), 3))
+test('Some#chain', t => t.is(Option(2).chain(() => Option(3)).get(), 3))
+test('None#chain', t => t.is(Option(2).chain(() => Option(null)).getOrElse(3), 3))
