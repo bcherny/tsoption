@@ -1,7 +1,8 @@
 {
   "name": "tsoption",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Correct, easy to use Option type for TypeScript",
+  "keywords": ["option", "optional", "monad", "functor", "typescript", "type", "null", "safe"],
   "main": "index.js",
   "scripts": {
     "build": "npm run clean && npm run lint && tsc -d",
