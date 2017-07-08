@@ -1,23 +1,54 @@
-export type None<T> = {
+/** @see https://github.com/fantasyland/fantasy-land#functor */
+type FunctorNone<T> = {
+  map<U = T>(f: (value: T) => U): None<U>
+}
+
+/** @see https://github.com/fantasyland/fantasy-land#functor */
+type FunctorSome<T> = {
+  map<U = T>(f: (value: T) => null): None<U>
+  map<U = T>(f: (value: T) => U): Some<U>
+}
+
+/** @see https://github.com/fantasyland/fantasy-land#chain */
+type ChainNone<T> = {
+  /* alias for map */
+  chain<U = T>(f: (value: T) => U): None<U>
+}
+
+/** @see https://github.com/fantasyland/fantasy-land#chain */
+type ChainSome<T> = {
+  /* alias for map */
+  chain<U = T>(f: (value: T) => null): None<U>
+  chain<U = T>(f: (value: T) => U): Some<U>
+}
+
+/** @see https://github.com/fantasyland/fantasy-land#monad */
+type MonadNone<T> = FunctorNone<T> & ChainNone<T> & {
+
+}
+
+/** @see https://github.com/fantasyland/fantasy-land#monad */
+type MonadSome<T> = FunctorSome<T> & ChainSome<T> & {
+
+}
+
+export type None<T> = MonadNone<T> & {
   flatMap<U = T>(f: (value: T) => Some<U>): None<T>
   flatMap<U = T>(f: (value: T) => None<U>): None<T>
   getOrElse<U extends T>(def: U): U
   isEmpty(): true
-  map<U = T>(f: (value: T) => U): None<U>
   nonEmpty(): false
   orElse<U extends T>(alternative: None<U>): None<T>
   orElse<U extends T>(alternative: Some<U>): Some<U>
   toString(): string
 }
 
-export type Some<T> = {
+export type Some<T> = MonadSome<T> & {
   flatMap<U = T>(f: (value: T) => Some<U>): Some<U>
   flatMap<U = T>(f: (value: T) => None<U>): None<T>
   get(): T
   getOrElse<U extends T>(def: U): T
   isEmpty(): false
-  map<U = T>(f: (value: T) => null): None<U>
-  map<U = T>(f: (value: T) => U): Some<U>
   nonEmpty(): true
   orElse<U extends T>(alternative: None<U>): Some<T>
   orElse<U extends T>(alternative: Some<U>): Some<U>
@@ -56,11 +87,27 @@ export function Some<T>(value: T): Option<T> {
   }
 }
 
-export function Option<T>(value: null): None<T>
-export function Option<T>(value: T): Some<T>
-export function Option<T>(value: T | null) {
+type Applicative = {
+  constructor: {
+    of<T>(value: T | null): Option<T>
+  }
+}
+
+type ApplicativeStatic = {
+  of<T>(value: T | null): Option<T>
+}
+
+export type OptionStatic = ApplicativeStatic & {
+  <T>(value: null): None<T>
+  <T>(value: T): Some<T>
+}
+
+export let Option: OptionStatic = (<T>(value: T | null) => {
   if (value == null) {
     return None<T>()
   }
   return Some(value)
-}
+}) as any
+
+Option.of = <T>(value: T | null) =>
+  Option(value)
