@@ -39,3 +39,7 @@ test('None#orElse', t => t.is(Option(null).orElse(Option(3)).get(), 3))
 
 test('Some#toString', t => t.is(Option(3) + '', 'Some(3)'))
 test('None#toString', t => t.is(Option(null) + '', 'None'))
+
+// laws
+
+test('Applicative#ap', t => t.is(Option(3).ap(Option.of(x => x)), 3))

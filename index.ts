@@ -11,15 +11,24 @@ type FunctorSome<T> = {
 
 /** @see https://github.com/fantasyland/fantasy-land#chain */
 type ChainNone<T> = {
-  /* alias for map */
-  chain<U = T>(f: (value: T) => U): None<U>
+  /* alias for flatMap */
+  chain<U = T>(f: (value: T) => Some<U>): None<T>
+  chain<U = T>(f: (value: T) => None<U>): None<T>
 }
 
 /** @see https://github.com/fantasyland/fantasy-land#chain */
 type ChainSome<T> = {
-  /* alias for map */
-  chain<U = T>(f: (value: T) => null): None<U>
-  chain<U = T>(f: (value: T) => U): Some<U>
+  /* alias for flatMap */
+  chain<U = T>(f: (value: T) => Some<U>): Some<U>
+  chain<U = T>(f: (value: T) => None<U>): None<T>
+}
+
+type ApplicativeSome<T> = {
+  // ap<U>(option: None<U>): None<U>
+  ap<U, V extends Some<(value: U) => U>>(option: V): Some<U>
+  constructor: {
+    of: typeof Option
+  }
 }
 
 /** @see https://github.com/fantasyland/fantasy-land#monad */
@@ -28,7 +37,7 @@ type MonadNone<T> = FunctorNone<T> & ChainNone<T> & {
 }
 
 /** @see https://github.com/fantasyland/fantasy-land#monad */
-type MonadSome<T> = FunctorSome<T> & ChainSome<T> & {
+type MonadSome<T> = ApplicativeSome<T> & FunctorSome<T> & ChainSome<T> & {
 
 }
 
@@ -58,14 +67,19 @@ export type Some<T> = MonadSome<T> & {
 export type Option<T> = Some<T> | None<T>
 
 export function None<T>(): None<T> {
+
+  let flatMap = <U>(_f: (value: T) => Option<U>): None<U> => None<U>()
+
   return {
-    flatMap: <U>(_f: (value: T) => Option<U>): None<U> => None<U>(),
+    flatMap,
     getOrElse: <U extends T>(def: U) => def,
     isEmpty: () => true,
     map: <U>(_f: (value: T) => U): any => None<T>(),
     nonEmpty: () => false,
     orElse: <U extends T>(alternative: Option<U>): any => alternative,
-    toString: () => 'None'
+    toString: () => 'None',
+
+    chain: flatMap
   }
 }
 
@@ -75,26 +89,28 @@ export function Some<T>(value: T): Option<T> {
     return None<T>()
   }
 
+  let flatMap = <U>(f: (value: T) => Option<U>): any => f(value)
+
   return {
-    flatMap: <U>(f: (value: T) => Option<U>): any => f(value),
+    flatMap,
     get: () => value,
     getOrElse: <U extends T>(def: U): T | U  => value || def,
     isEmpty: () => false,
     map: <U>(f: (value: T) => U): any => Option(f(value)),
     nonEmpty: () => true,
     orElse: <U extends T>(_alternative: Option<U>): any => Some(value),
-    toString: () => `Some(${value})`
-  }
-}
+    toString: () => `Some(${value})`,
 
-type Applicative = {
-  constructor: {
-    of<T>(value: T | null): Option<T>
+    ap: <U, V extends Some<(value: U) => U>>(option: V) => option.map(value),
+    chain: flatMap,
+    constructor: {
+      of: Option
+    }
   }
 }
 
 type ApplicativeStatic = {
-  of<T>(value: T | null): Option<T>
+  of: typeof Option
 }
 
 export type OptionStatic = ApplicativeStatic & {
@@ -109,5 +125,4 @@ export let Option: OptionStatic = (<T>(value: T | null) => {
   return Some(value)
 }) as any
 
-Option.of = <T>(value: T | null) =>
-  Option(value)
+Option.of = Option
