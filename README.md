@@ -65,6 +65,10 @@ Option(null).nonEmpty()                  // false (known at compile time too!)
 // #orElse
 Option(2).orElse(Option(3))              // Some(2)
 Option(null).orElse(Option(3))           // Some(3)
+
+// #toString
+Option(2).toString()                     // "Some(2)"
+Option(null).toString()                  // "None"
 ```
 
 ## Tests

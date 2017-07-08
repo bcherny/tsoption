@@ -15,12 +15,19 @@ test('two', t => t.is(Option('a')
   .orElse(Option('c'))
   .getOrElse('d'), 'c'))
 
-test('three', t => t.is(Option(null)
-  .getOrElse(3), 3))
+test('Some#getOrElse', t => t.is(Option(1).getOrElse(3), 1))
+test('None#getOrElse', t => t.is(Option(null).getOrElse(3), 3))
 
-test('four', t => t.is(Option(3).isEmpty(), false))
-test('five', t => t.is(Option(null).isEmpty(), true))
-test('six', t => t.is(Option(undefined).isEmpty(), true))
+test('Some#isEmpty', t => t.is(Option(3).isEmpty(), false))
+test('None#isEmpty (1)', t => t.is(Option(null).isEmpty(), true))
+test('None#isEmpty (2)', t => t.is(Option(undefined).isEmpty(), true))
 
-test('seven', t => t.is(Option(null)
-  .map(() => 4).getOrElse(5), 5))
+test('Some#nonEmpty', t => t.is(Option(3).nonEmpty(), true))
+test('None#nonEmpty (1)', t => t.is(Option(null).nonEmpty(), false))
+test('None#nonEmpty (2)', t => t.is(Option(undefined).nonEmpty(), false))
+
+test('Some#map', t => t.is(Option(3).map(() => 4).getOrElse(5), 4))
+test('None#map', t => t.is(Option(null).map(() => 4).getOrElse(5), 5))
+
+test('Some#toString', t => t.is(Option(3) + '', 'Some(3)'))
+test('None#toString', t => t.is(Option(null) + '', 'None'))

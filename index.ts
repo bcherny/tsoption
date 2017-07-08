@@ -7,6 +7,7 @@ export type None<T> = {
   nonEmpty(): false
   orElse<U extends T>(alternative: None<U>): None<T>
   orElse<U extends T>(alternative: Some<U>): Some<U>
+  toString(): string
 }
 
 export type Some<T> = {
@@ -20,6 +21,7 @@ export type Some<T> = {
   nonEmpty(): true
   orElse<U extends T>(alternative: None<U>): Some<T>
   orElse<U extends T>(alternative: Some<U>): Some<U>
+  toString(): string
 }
 
 export type Option<T> = Some<T> | None<T>
@@ -31,7 +33,8 @@ export function None<T>(): None<T> {
     isEmpty: () => true,
     map: <U>(_f: (value: T) => U): any => None<T>(),
     nonEmpty: () => false,
-    orElse: <U extends T>(alternative: Option<U>): any => alternative
+    orElse: <U extends T>(alternative: Option<U>): any => alternative,
+    toString: () => 'None'
   }
 }
 
@@ -48,7 +51,8 @@ export function Some<T>(value: T): Option<T> {
     isEmpty: () => false,
     map: <U>(f: (value: T) => U): any => Option(f(value)),
     nonEmpty: () => true,
-    orElse: <U extends T>(_alternative: Option<U>): any => Some(value)
+    orElse: <U extends T>(_alternative: Option<U>): any => Some(value),
+    toString: () => `Some(${value})`
   }
 }
 
