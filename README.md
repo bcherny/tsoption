@@ -71,6 +71,21 @@ Option(2).toString()                     // "Some(2)"
 Option(null).toString()                  // "None"
 ```
 
+## FantasyLand
+
+TSOption is [FantasyLand](https://github.com/fantasyland/fantasy-land)-compliant. It implements:
+
+- [ ] [Applicative](https://github.com/fantasyland/fantasy-land#applicative)
+- [ ] [Apply](https://github.com/fantasyland/fantasy-land#apply)
+- [x] [Chain](https://github.com/fantasyland/fantasy-land#chain)
+- [x] [Functor](https://github.com/fantasyland/fantasy-land#functor)
+- [x] [Monad](https://github.com/fantasyland/fantasy-land#monad)
+
+### FantasyLand API
+
+```ts
+```
+
 ## Tests
 
 ```sh

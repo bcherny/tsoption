@@ -40,8 +40,81 @@ test('None#orElse', t => t.is(Option(null).orElse(Option(3)).get(), 3))
 test('Some#toString', t => t.is(Option(3) + '', 'Some(3)'))
 test('None#toString', t => t.is(Option(null) + '', 'None'))
 
-test('Some#ap', t => t.is(Option((x: number) => x).ap(Option(3)).get(), 3))
-test('None#ap', t => t.is(Option((x: number) => x).ap(Option(null)).getOrElse(3), 3))
+// fantasyland laws
 
-test('Some#chain', t => t.is(Option(2).chain(() => Option(3)).get(), 3))
-test('None#chain', t => t.is(Option(2).chain(() => Option(null)).getOrElse(3), 3))
+test('Some:functor:identity', t => {
+  let option = Option({})
+  t.is(option.map(_ => _), option)
+})
+test('None:functor:identity', t => {
+  let option = Option(null)
+  t.is(option.map(_ => _), option)
+})
+
+test('Some:functor:composition', t => {
+  let option = Option(1)
+  let f = (_: number) => _ * 7
+  let g = (_: number) => _ % 5
+  t.is(option.map(_ => f(g(_))).get(), option.map(g).map(f).get())
+})
+test('None:functor:composition', t => {
+  let option = Option<number>(null)
+  let f = (_: number) => _ * 7
+  let g = (_: number) => _ % 5
+  t.is(option.map(_ => f(g(_))).getOrElse(-1), option.map(g).map(f).getOrElse(-1))
+})
+
+// test('Some:apply:composition', t => {
+//   let option = Option(1)
+//   t.is(
+//     option.ap(option.ap(a.map(f => g => x => f(g(x))))).get(),
+//     option.ap(u).ap(a)
+//   )
+// })
+
+test('Some:chain:associativity', t => {
+  let option = Option(1)
+  let f = (_: number) => Option(_ * 7)
+  let g = (_: number) => Option(_ % 5)
+  t.is(
+    option.chain(f).chain(g).get(),
+    option.chain(x => f(x).chain(g)).get()
+  )
+})
+test('None:chain:associativity', t => {
+  let option = Option<number>(null)
+  let f = (_: number) => Option(_ * 7)
+  let g = (_: number) => Option(_ % 5)
+  t.is(
+    option.chain(f).chain(g).getOrElse(-1),
+    option.chain(x => f(x).chain(g)).getOrElse(-1)
+  )
+})
+
+test('Some:monad:left identity', t => {
+  let f = (_: number) => Option(_ * 7)
+  t.is(
+    Option.of(1).chain(f).get(),
+    f(1).get()
+  )
+})
+test('None:monad:left identity', t => {
+  let f = (_: number | null) => Option<number>(null)
+  t.is(
+    Option.of<number>(null).chain(f).getOrElse(-1),
+    f(null).getOrElse(-1)
+  )
+})
+
+test('Some:monad:right identity', t => {
+  t.is(
+    Option(1).chain(Option.of).get(),
+    Option(1).get()
+  )
+})
+test('None:monad:right identity', t => {
+  t.is(
+    Option(null).chain(Option.of).getOrElse(-1),
+    Option(null).getOrElse(-1)
+  )
+})

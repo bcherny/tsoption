@@ -1,55 +1,51 @@
 /** @see https://github.com/fantasyland/fantasy-land#functor */
-type FunctorNone<T> = {
+export interface FunctorNone<T> {
   map<U = T>(f: (value: T) => U): None<U>
 }
 
 /** @see https://github.com/fantasyland/fantasy-land#functor */
-type FunctorSome<T> = {
+export interface FunctorSome<T> {
   map<U = T>(f: (value: T) => null): None<U>
   map<U = T>(f: (value: T) => U): Some<U>
 }
 
 /** @see https://github.com/fantasyland/fantasy-land#chain */
-type ChainNone<T> = {
+export interface ChainNone<T> {
   /* alias for flatMap */
   chain<U = T>(f: (value: T) => Some<U>): None<T>
   chain<U = T>(f: (value: T) => None<U>): None<T>
 }
 
 /** @see https://github.com/fantasyland/fantasy-land#chain */
-type ChainSome<T> = {
+export interface ChainSome<T> {
   /* alias for flatMap */
   chain<U = T>(f: (value: T) => Some<U>): Some<U>
   chain<U = T>(f: (value: T) => None<U>): None<T>
 }
 
-type ApplicativeNone<T> = {
-  // ap<U>(option: None<U>): None<U>
-  ap<U, V extends Some<(value: U) => U>>(option: V): None<U>
-  constructor: {
-    of: typeof Option
-  }
-}
+// interface ApplyNone<T> {
+//   // ap<U>(option: None<U>): None<U>
+//   ap<U, V extends Some<(value: U) => U>>(option: V): None<U>
+//   constructor: {
+//     of: typeof Option
+//   }
+// }
 
-type ApplicativeSome<T> = {
-  // ap<U>(option: None<U>): None<U>
-  ap<U, V extends Some<(value: U) => U>>(option: V): Some<U>
-  constructor: {
-    of: typeof Option
-  }
-}
-
-/** @see https://github.com/fantasyland/fantasy-land#monad */
-type MonadNone<T> = ApplicativeNone<T> & FunctorNone<T> & ChainNone<T> & {
-
-}
+// interface ApplySome<T> {
+//   // ap<U>(option: None<U>): None<U>
+//   ap(f: ApplySome<T>): Some<T>
+//   constructor: {
+//     of: typeof Option
+//   }
+// }
 
 /** @see https://github.com/fantasyland/fantasy-land#monad */
-type MonadSome<T> = ApplicativeSome<T> & FunctorSome<T> & ChainSome<T> & {
+export interface MonadNone<T> extends FunctorNone<T>, ChainNone<T> {}
 
-}
+/** @see https://github.com/fantasyland/fantasy-land#monad */
+export interface MonadSome<T> extends FunctorSome<T>, ChainSome<T> {}
 
-export type None<T> = MonadNone<T> & {
+export interface None<T> extends MonadNone<T> {
   flatMap<U = T>(f: (value: T) => Some<U>): None<T>
   flatMap<U = T>(f: (value: T) => None<U>): None<T>
   getOrElse<U extends T>(def: U): U
@@ -60,7 +56,7 @@ export type None<T> = MonadNone<T> & {
   toString(): string
 }
 
-export type Some<T> = MonadSome<T> & {
+export interface Some<T> extends MonadSome<T> {
   flatMap<U = T>(f: (value: T) => Some<U>): Some<U>
   flatMap<U = T>(f: (value: T) => None<U>): None<T>
   get(): T
@@ -78,21 +74,20 @@ export function None<T>(): None<T> {
 
   let flatMap = <U>(_f: (value: T) => Option<U>): None<U> => None<U>()
 
-  return {
+  let none: None<T> = {
     flatMap,
     getOrElse: <U extends T>(def: U) => def,
     isEmpty: () => true,
-    map: <U>(_f: (value: T) => U): any => None<T>(),
     nonEmpty: () => false,
     orElse: <U extends T>(alternative: Option<U>): any => alternative,
     toString: () => 'None',
 
-    ap: <U, V extends Some<(value: U) => U>>(option: V) => None<T>(),
+    // fantasyland
     chain: flatMap,
-    constructor: {
-      of: Option
-    }
+    map: <U>(_f: (value: T) => U): any => none
   }
+
+  return none
 }
 
 export function Some<T>(value: T): Option<T> {
@@ -103,25 +98,30 @@ export function Some<T>(value: T): Option<T> {
 
   let flatMap = <U>(f: (value: T) => Option<U>): any => f(value)
 
-  return {
+  let some: Some<T> = {
     flatMap,
     get: () => value,
     getOrElse: <U extends T>(def: U): T | U  => value || def,
     isEmpty: () => false,
-    map: <U>(f: (value: T) => U): any => Option(f(value)),
     nonEmpty: () => true,
     orElse: <U extends T>(_alternative: Option<U>): any => Some(value),
     toString: () => `Some(${value})`,
 
-    ap: <U, V extends Some<(value: U) => U>>(option: V) => option.map(value),
+    // fantasyland
     chain: flatMap,
-    constructor: {
-      of: Option
+    map: <U>(f: (value: T) => U): any => {
+      let v = f(value)
+      if (v === value as any) {
+        return some // obey functor identity law
+      }
+      return Option(v)
     }
   }
+
+  return some
 }
 
-type ApplicativeStatic = {
+export type ApplicativeStatic = {
   of: typeof Option
 }
 
