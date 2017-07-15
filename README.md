@@ -1,8 +1,9 @@
-# tsoption [![Build Status][build]](https://circleci.com/gh/bcherny/tsoption) [![npm]](https://www.npmjs.com/package/tsoption) [![mit]](https://opensource.org/licenses/MIT)
+# tsoption [![Build Status][build]](https://circleci.com/gh/bcherny/tsoption) [![npm]](https://www.npmjs.com/package/tsoption) [![mit]](https://opensource.org/licenses/MIT) [![fantasy]](https://github.com/fantasyland/fantasy-land#monad)
 
 [build]: https://img.shields.io/circleci/project/bcherny/tsoption.svg?branch=master&style=flat-square
 [npm]: https://img.shields.io/npm/v/tsoption.svg?style=flat-square
 [mit]: https://img.shields.io/npm/l/tsoption.svg?style=flat-square
+[fantasy]: https://img.shields.io/badge/Fantasyland-Monad-ff4ba4.svg?style=flat-square
 
 > Correct, easy to use Option type for TypeScript. Like Scala options, but treats Some(null) as None, because TypeScript can.
 
@@ -71,19 +72,38 @@ Option(2).toString()                     // "Some(2)"
 Option(null).toString()                  // "None"
 ```
 
-## FantasyLand
+## Fantasyland
 
-TSOption is [FantasyLand](https://github.com/fantasyland/fantasy-land)-compliant. It implements:
+TSOption is [Fantasyland](https://github.com/fantasyland/fantasy-land)-compliant. It implements:
 
-- [ ] [Applicative](https://github.com/fantasyland/fantasy-land#applicative)
-- [ ] [Apply](https://github.com/fantasyland/fantasy-land#apply)
+- [x] [Applicative](https://github.com/fantasyland/fantasy-land#applicative)
+- [x] [Apply](https://github.com/fantasyland/fantasy-land#apply)
 - [x] [Chain](https://github.com/fantasyland/fantasy-land#chain)
 - [x] [Functor](https://github.com/fantasyland/fantasy-land#functor)
 - [x] [Monad](https://github.com/fantasyland/fantasy-land#monad)
 
-### FantasyLand API
+### Fantasyland-Compatible API
 
 ```ts
+// Create an option
+Option.of(3)                               // Some(3)
+Option.of('abc')                           // Some('abc')
+Option.of(null)                            // None
+Option.of(undefined)                       // None
+Option.of(3).constructor.of(4)             // Some(4)
+Option.of(3).constructor.of(null)          // None
+
+// #chain
+Option.of(3).chain(_ => Option.of(_ * 2))  // Some(6)
+Option.of(null).chain(() => Option.of(2))  // None  (known at compile time too!)
+
+// #map
+Option.of(2).map(_ => _ * 2)               // Option(4)
+Option.of(null).map(() => 2)               // None  (known at compile time too!)
+
+// #ap
+Option.of(2).ap(Option.of(_ => _ * 2))     // Option(4)
+Option.of(null).ap(Option.of(() => 2))     // None  (known at compile time too!)
 ```
 
 ## Tests

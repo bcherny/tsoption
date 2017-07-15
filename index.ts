@@ -23,34 +23,42 @@ export interface ChainSome<T> {
   chain<U = T>(f: (value: T) => None<U>): None<T>
 }
 
-// interface ApplyNone<T> {
-//   // ap<U>(option: None<U>): None<U>
-//   ap<U, V extends Some<(value: U) => U>>(option: V): None<U>
-//   constructor: {
-//     of: typeof Option
-//   }
-// }
+/** @see https://github.com/fantasyland/fantasy-land#apply */
+/** @see https://github.com/fantasyland/fantasy-land#applicative */
+export interface ApplicativeNone<T> {
+  ap(a: Some<(v: T) => T>): None<T>
+  constructor: {
+    of: typeof Option
+  }
+}
 
-// interface ApplySome<T> {
-//   // ap<U>(option: None<U>): None<U>
-//   ap(f: ApplySome<T>): Some<T>
-//   constructor: {
-//     of: typeof Option
-//   }
-// }
+/** @see https://github.com/fantasyland/fantasy-land#apply */
+/** @see https://github.com/fantasyland/fantasy-land#applicative */
+export interface ApplicativeSome<T> {
+  ap(a: Some<(v: T) => null>): None<T>
+  ap(a: Some<(v: T) => T>): Some<T>
+  constructor: {
+    of: typeof Option
+  }
+}
+
+/** @see https://github.com/fantasyland/fantasy-land#applicative */
+export interface ApplicativeStatic {
+  of: typeof Option
+}
 
 /** @see https://github.com/fantasyland/fantasy-land#monad */
-export interface MonadNone<T> extends FunctorNone<T>, ChainNone<T> {}
+export interface MonadNone<T> extends ApplicativeNone<T>, FunctorNone<T>, ChainNone<T> {}
 
 /** @see https://github.com/fantasyland/fantasy-land#monad */
-export interface MonadSome<T> extends FunctorSome<T>, ChainSome<T> {}
+export interface MonadSome<T> extends ApplicativeSome<T>, FunctorSome<T>, ChainSome<T> {}
 
 export interface None<T> extends MonadNone<T> {
   flatMap<U = T>(f: (value: T) => Some<U>): None<T>
   flatMap<U = T>(f: (value: T) => None<U>): None<T>
   getOrElse<U extends T>(def: U): U
-  isEmpty(): true
-  nonEmpty(): false
+  isEmpty(): this is None<T>
+  nonEmpty(): this is Some<T>
   orElse<U extends T>(alternative: None<U>): None<T>
   orElse<U extends T>(alternative: Some<U>): Some<U>
   toString(): string
@@ -61,8 +69,8 @@ export interface Some<T> extends MonadSome<T> {
   flatMap<U = T>(f: (value: T) => None<U>): None<T>
   get(): T
   getOrElse<U extends T>(def: U): T
-  isEmpty(): false
-  nonEmpty(): true
+  isEmpty(): this is None<T>
+  nonEmpty(): this is Some<T>
   orElse<U extends T>(alternative: None<U>): Some<T>
   orElse<U extends T>(alternative: Some<U>): Some<U>
   toString(): string
@@ -83,7 +91,11 @@ export function None<T>(): None<T> {
     toString: () => 'None',
 
     // fantasyland
+    ap: (_a: Some<(v: T) => T | null>): any => none,
     chain: flatMap,
+    constructor: {
+      of: Option
+    },
     map: <U>(_f: (value: T) => U): any => none
   }
 
@@ -108,7 +120,17 @@ export function Some<T>(value: T): Option<T> {
     toString: () => `Some(${value})`,
 
     // fantasyland
+    ap: (a: Some<(v: T) => T | null>): any => {
+      let v = a.get()(value)
+      if (v === value) {
+        return some
+      }
+      return Option(v)
+    },
     chain: flatMap,
+    constructor: {
+      of: Option
+    },
     map: <U>(f: (value: T) => U): any => {
       let v = f(value)
       if (v === value as any) {
@@ -119,10 +141,6 @@ export function Some<T>(value: T): Option<T> {
   }
 
   return some
-}
-
-export type ApplicativeStatic = {
-  of: typeof Option
 }
 
 export type OptionStatic = ApplicativeStatic & {

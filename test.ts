@@ -1,4 +1,4 @@
-import { test } from 'ava'
+import { AssertContext, test } from 'ava'
 import { Option } from './'
 
 test('one', t =>
@@ -55,66 +55,127 @@ test('Some:functor:composition', t => {
   let option = Option(1)
   let f = (_: number) => _ * 7
   let g = (_: number) => _ % 5
-  t.is(option.map(_ => f(g(_))).get(), option.map(g).map(f).get())
+  is(t)(option.map(_ => f(g(_))), option.map(g).map(f))
 })
 test('None:functor:composition', t => {
   let option = Option<number>(null)
   let f = (_: number) => _ * 7
   let g = (_: number) => _ % 5
-  t.is(option.map(_ => f(g(_))).getOrElse(-1), option.map(g).map(f).getOrElse(-1))
+  is(t)(option.map(_ => f(g(_))), option.map(g).map(f))
 })
 
-// test('Some:apply:composition', t => {
-//   let option = Option(1)
-//   t.is(
-//     option.ap(option.ap(a.map(f => g => x => f(g(x))))).get(),
-//     option.ap(u).ap(a)
-//   )
-// })
+test('Some:apply:composition', t => {
+  type N = (_: number) => number
+  let a = Option<N>(_ => _ * 7)
+  let v = Option(2)
+  let u = Option<N>(_ => _ % 5)
+  let z = a.map((f: N) => (g: N): ((x: number) => number) => (x: number): number => f(g(x)))
+  is(t)(
+    v.ap(u.ap(z)),
+    v.ap(u).ap(a)
+  )
+})
+test('None:apply:composition', t => {
+  type N = (_: number) => number
+  let a = Option<N>(_ => _ * 7)
+  let v = Option(null)
+  let u = Option<N>(_ => _ % 5)
+  let z = a.map((f: N) => (g: N): ((x: number) => number) => (x: number): number => f(g(x)))
+  is(t)(
+    v.ap(u.ap(z)),
+    v.ap(u).ap(a)
+  )
+})
+
+test('Some:applicative:identity', t => {
+  let a = Option(1)
+  t.is(a.ap(Option.of((_: number) => _)), a)
+})
+test('None:applicative:identity', t => {
+  let a = Option<number>(null)
+  t.is(a.ap(Option.of((_: number) => _)), a)
+})
+
+test('Some:applicative:homomorphism', t => {
+  let f = (_: number) => _ * 7
+  is(t)(
+    Option.of(1).ap(Option.of(f)),
+    Option.of(f(1))
+  )
+})
+test('None:applicative:homomorphism', t => {
+  let f = (_: null) => null
+  is(t)(
+    Option.of<null>(null).ap(Option.of(f)),
+    Option.of<null>(f(null))
+  )
+})
+
+test('Some:applicative:interchange', t => {
+  type N = (_: number) => number
+  let y = 1
+  let u = Option<N>(_ => _ * 7)
+  is(t)(
+    Option.of(y).ap(u),
+    u.ap(Option.of<(f: N) => any>(f => f(y))) // TODO: rm any
+  )
+})
 
 test('Some:chain:associativity', t => {
   let option = Option(1)
   let f = (_: number) => Option(_ * 7)
   let g = (_: number) => Option(_ % 5)
-  t.is(
-    option.chain(f).chain(g).get(),
-    option.chain(x => f(x).chain(g)).get()
+  is(t)(
+    option.chain(f).chain(g),
+    option.chain(x => f(x).chain(g))
   )
 })
 test('None:chain:associativity', t => {
   let option = Option<number>(null)
   let f = (_: number) => Option(_ * 7)
   let g = (_: number) => Option(_ % 5)
-  t.is(
-    option.chain(f).chain(g).getOrElse(-1),
-    option.chain(x => f(x).chain(g)).getOrElse(-1)
+  is(t)(
+    option.chain(f).chain(g),
+    option.chain(x => f(x).chain(g))
   )
 })
 
 test('Some:monad:left identity', t => {
   let f = (_: number) => Option(_ * 7)
-  t.is(
-    Option.of(1).chain(f).get(),
-    f(1).get()
+  is(t)(
+    Option.of(1).chain(f),
+    f(1)
   )
 })
 test('None:monad:left identity', t => {
   let f = (_: number | null) => Option<number>(null)
-  t.is(
-    Option.of<number>(null).chain(f).getOrElse(-1),
-    f(null).getOrElse(-1)
+  is(t)(
+    Option.of<number>(null).chain(f),
+    f(null)
   )
 })
 
 test('Some:monad:right identity', t => {
-  t.is(
-    Option(1).chain(Option.of).get(),
-    Option(1).get()
+  is(t)(
+    Option(1).chain(Option.of),
+    Option(1)
   )
 })
 test('None:monad:right identity', t => {
-  t.is(
-    Option(null).chain(Option.of).getOrElse(-1),
-    Option(null).getOrElse(-1)
+  is(t)(
+    Option(null).chain(Option.of),
+    Option(null)
   )
 })
+
+function is(t: AssertContext) {
+  return <T>(a: Option<T>, b: Option<T>) => {
+    if (a.isEmpty() && b.isEmpty()) {
+      return t.is(a.isEmpty(), b.isEmpty())
+    }
+    if (a.nonEmpty() && b.nonEmpty() && a.get() === b.get()) {
+      return t.is(a.get(), b.get())
+    }
+    t.fail(`Option ${a} != Option ${b}`)
+  }
+}
