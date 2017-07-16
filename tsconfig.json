@@ -19,6 +19,7 @@
     "target": "es5"
   },
   "files": [
+    "fantasy-land-types.d.ts",
     "index.ts",
     "test.ts"
   ]

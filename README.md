@@ -85,25 +85,28 @@ TSOption is [Fantasyland](https://github.com/fantasyland/fantasy-land)-compliant
 ### Fantasyland-Compatible API
 
 ```ts
+import * as fl from 'fantasy-land'
+const {ap, chain, map, of} = fl
+
 // Create an option
-Option.of(3)                               // Some(3)
-Option.of('abc')                           // Some('abc')
-Option.of(null)                            // None
-Option.of(undefined)                       // None
-Option.of(3).constructor.of(4)             // Some(4)
-Option.of(3).constructor.of(null)          // None
+Option[of](3)                                // Some(3)
+Option[of]('abc')                            // Some('abc')
+Option[of](null)                             // None
+Option[of](undefined)                        // None
+Option[of](3).constructor[of](4)             // Some(4)
+Option[of](3).constructor[of](null)          // None
 
 // #chain
-Option.of(3).chain(_ => Option.of(_ * 2))  // Some(6)
-Option.of(null).chain(() => Option.of(2))  // None  (known at compile time too!)
+Option[of](3)[chain](_ => Option[of](_ * 2)) // Some(6)
+Option[of](null)[chain](() => Option[of](2)) // None  (known at compile time too!)
 
 // #map
-Option.of(2).map(_ => _ * 2)               // Option(4)
-Option.of(null).map(() => 2)               // None  (known at compile time too!)
+Option[of](2)[map](_ => _ * 2)               // Option(4)
+Option[of](null)[map](() => 2)               // None  (known at compile time too!)
 
 // #ap
-Option.of(2).ap(Option.of(_ => _ * 2))     // Option(4)
-Option.of(null).ap(Option.of(() => 2))     // None  (known at compile time too!)
+Option[of](2)[ap](Option[of](_ => _ * 2))    // Option(4)
+Option[of](null)[ap](Option[of](() => 2))    // None  (known at compile time too!)
 ```
 
 ## Tests

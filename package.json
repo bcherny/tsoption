@@ -2,7 +2,16 @@
   "name": "tsoption",
   "version": "0.2.1",
   "description": "Correct, easy to use Option type for TypeScript",
-  "keywords": ["option", "optional", "monad", "functor", "typescript", "type", "null", "safe"],
+  "keywords": [
+    "option",
+    "optional",
+    "monad",
+    "functor",
+    "typescript",
+    "type",
+    "null",
+    "safe"
+  ],
   "main": "index.js",
   "scripts": {
     "build": "npm run clean && npm run lint && tsc -d",
@@ -20,6 +29,7 @@
   "devDependencies": {
     "ava": "^0.20.0",
     "concurrently": "^3.5.0",
+    "fantasy-land": "^3.3.0",
     "tslint": "^5.5.0",
     "typescript": "^2.4.1"
   },

@@ -1,5 +1,7 @@
 import { AssertContext, test } from 'ava'
+import * as fl from 'fantasy-land'
 import { Option } from './'
+const {ap, chain, map, of} = fl
 
 test('one', t =>
   t.is(Option(3)
@@ -44,24 +46,24 @@ test('None#toString', t => t.is(Option(null) + '', 'None'))
 
 test('Some:functor:identity', t => {
   let option = Option({})
-  t.is(option.map(_ => _), option)
+  t.is(option[map](_ => _), option)
 })
 test('None:functor:identity', t => {
   let option = Option(null)
-  t.is(option.map(_ => _), option)
+  t.is(option[map](_ => _), option)
 })
 
 test('Some:functor:composition', t => {
   let option = Option(1)
   let f = (_: number) => _ * 7
   let g = (_: number) => _ % 5
-  is(t)(option.map(_ => f(g(_))), option.map(g).map(f))
+  is(t)(option[map](_ => f(g(_))), option[map](g)[map](f))
 })
 test('None:functor:composition', t => {
   let option = Option<number>(null)
   let f = (_: number) => _ * 7
   let g = (_: number) => _ % 5
-  is(t)(option.map(_ => f(g(_))), option.map(g).map(f))
+  is(t)(option[map](_ => f(g(_))), option[map](g)[map](f))
 })
 
 test('Some:apply:composition', t => {
@@ -69,10 +71,10 @@ test('Some:apply:composition', t => {
   let a = Option<N>(_ => _ * 7)
   let v = Option(2)
   let u = Option<N>(_ => _ % 5)
-  let z = a.map((f: N) => (g: N): ((x: number) => number) => (x: number): number => f(g(x)))
+  let z = a[map]((f: N) => (g: N): ((x: number) => number) => (x: number): number => f(g(x)))
   is(t)(
-    v.ap(u.ap(z)),
-    v.ap(u).ap(a)
+    v[ap](u[ap](z)),
+    v[ap](u)[ap](a)
   )
 })
 test('None:apply:composition', t => {
@@ -80,34 +82,34 @@ test('None:apply:composition', t => {
   let a = Option<N>(_ => _ * 7)
   let v = Option(null)
   let u = Option<N>(_ => _ % 5)
-  let z = a.map((f: N) => (g: N): ((x: number) => number) => (x: number): number => f(g(x)))
+  let z = a[map]((f: N) => (g: N): ((x: number) => number) => (x: number): number => f(g(x)))
   is(t)(
-    v.ap(u.ap(z)),
-    v.ap(u).ap(a)
+    v[ap](u[ap](z)),
+    v[ap](u)[ap](a)
   )
 })
 
 test('Some:applicative:identity', t => {
   let a = Option(1)
-  t.is(a.ap(Option.of((_: number) => _)), a)
+  t.is(a[ap](Option[of]((_: number) => _)), a)
 })
 test('None:applicative:identity', t => {
   let a = Option<number>(null)
-  t.is(a.ap(Option.of((_: number) => _)), a)
+  t.is(a[ap](Option[of]((_: number) => _)), a)
 })
 
 test('Some:applicative:homomorphism', t => {
   let f = (_: number) => _ * 7
   is(t)(
-    Option.of(1).ap(Option.of(f)),
-    Option.of(f(1))
+    Option[of](1)[ap](Option[of](f)),
+    Option[of](f(1))
   )
 })
 test('None:applicative:homomorphism', t => {
   let f = (_: null) => null
   is(t)(
-    Option.of<null>(null).ap(Option.of(f)),
-    Option.of<null>(f(null))
+    Option[of]<null>(null)[ap](Option[of](f)),
+    Option[of]<null>(f(null))
   )
 })
 
@@ -116,8 +118,8 @@ test('Some:applicative:interchange', t => {
   let y = 1
   let u = Option<N>(_ => _ * 7)
   is(t)(
-    Option.of(y).ap(u),
-    u.ap(Option.of<(f: N) => any>(f => f(y))) // TODO: rm any
+    Option[of](y)[ap](u),
+    u[ap](Option[of]<(f: N) => any>(f => f(y))) // TODO: rm any
   )
 })
 
@@ -126,8 +128,8 @@ test('Some:chain:associativity', t => {
   let f = (_: number) => Option(_ * 7)
   let g = (_: number) => Option(_ % 5)
   is(t)(
-    option.chain(f).chain(g),
-    option.chain(x => f(x).chain(g))
+    option[chain](f)[chain](g),
+    option[chain](x => f(x)[chain](g))
   )
 })
 test('None:chain:associativity', t => {
@@ -135,35 +137,35 @@ test('None:chain:associativity', t => {
   let f = (_: number) => Option(_ * 7)
   let g = (_: number) => Option(_ % 5)
   is(t)(
-    option.chain(f).chain(g),
-    option.chain(x => f(x).chain(g))
+    option[chain](f)[chain](g),
+    option[chain](x => f(x)[chain](g))
   )
 })
 
 test('Some:monad:left identity', t => {
   let f = (_: number) => Option(_ * 7)
   is(t)(
-    Option.of(1).chain(f),
+    Option[of](1)[chain](f),
     f(1)
   )
 })
 test('None:monad:left identity', t => {
   let f = (_: number | null) => Option<number>(null)
   is(t)(
-    Option.of<number>(null).chain(f),
+    Option[of]<number>(null)[chain](f),
     f(null)
   )
 })
 
 test('Some:monad:right identity', t => {
   is(t)(
-    Option(1).chain(Option.of),
+    Option(1)[chain](Option[of]),
     Option(1)
   )
 })
 test('None:monad:right identity', t => {
   is(t)(
-    Option(null).chain(Option.of),
+    Option(null)[chain](Option[of]),
     Option(null)
   )
 })
