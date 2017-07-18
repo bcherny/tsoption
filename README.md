@@ -18,58 +18,61 @@ npm i tsoption -S
 *Note: You can use JavaScript instead of TypeScript, but it's not as fun.*
 
 ```ts
-let a = Option(3)                        // Some<number>(3)
-  .flatMap(_ => Option(5))               // Some<number>(5)
-  .map(_ => 'a')                         // Some<string>('a')
-  .orElse(Option('b'))                   // Some<string>('a')   (non-string type gives a compile error)
-  .getOrElse('c')                        // 'a'
+let a = Option.from(3)                // Some<number>(3)
+  .flatMap(_ => Some(5))              // Some<number>(5)
+  .map(_ => 'a')                      // Some<string>('a')
+  .orElse(Option.from('b'))           // Some<string>('a')   (non-string type gives a compile error)
+  .getOrElse('c')                     // 'a'
 
-let b = Option('a')                      // Some<string>('a')
-  .map(() => null)                       // None<string>(null)  (map can map to any type)
-  .orElse(Option('b'))                   // Some<string>('b')   (non-string type gives a compile error)
-  .get()                                 // 'b'
+let b = Option.from('a')              // Some<string>('a')
+  .flatMap(_ => None())               // None<string>()      (flatMap can map to any type)
+  .orElse(Option.from('b'))           // Some<string>('b')   (non-string type gives a compile error)
+  .get()                              // 'b'
 ```
 
 ## API
 
 ```ts
 // Create an option
-Option(3)                                // Some(3)
-Option('abc')                            // Some('abc')
-Option(null)                             // None
-Option(undefined)                        // None
+Option.from(3)                        // Some(3)
+Option.from('abc')                    // Some('abc')
+Option.from(null)                     // None                (for convenience)
+Option.from(undefined)                // None                (for convenience)
+Some(3)                               // Some(3)
+Some(null)                            // Some(null)
+None()                                // None
 
 // #flatMap
-Option(3).flatMap(_ => Option(_ * 2))    // Some(6)
-Option(null).flatMap(() => Option(2))    // None  (known at compile time too!)
+Some(3).flatMap(_ => Some(_ * 2))     // Some(6)
+None().flatMap(() => Some(2))         // None  (known at compile time too!)
 
 // #get
-Option(3).get()                          // 3
-Option(null).get()                       // COMPILE ERROR! Can't call get() on None
+Some(3).get()                         // 3
+None().get()                          // COMPILE ERROR! Can't call get() on None
 
 // #getOrElse
-Option(1).getOrElse(2)                   // 1
-Option(null).getOrElse(2)                // 2
+Some(1).getOrElse(2)                  // 1
+None().getOrElse(2)                   // 2
 
 // #isEmpty
-Option(2).isEmpty()                      // false (known at compile time too!)
-Option(null).isEmpty()                   // true  (known at compile time too!)
+Some(2).isEmpty()                     // false (known at compile time too!)
+None().isEmpty()                      // true  (known at compile time too!)
 
 // #map
-Option(2).map(_ => _ * 2)                // Option(4)
-Option(null).map(() => 2)                // None  (known at compile time too!)
+Some(2).map(_ => _ * 2)               // Option.from(4)
+None().map(() => 2)                   // None  (known at compile time too!)
 
 // #nonEmpty
-Option(2).nonEmpty()                     // true  (known at compile time too!)
-Option(null).nonEmpty()                  // false (known at compile time too!)
+Some(2).nonEmpty()                    // true  (known at compile time too!)
+None().nonEmpty()                     // false (known at compile time too!)
 
 // #orElse
-Option(2).orElse(Option(3))              // Some(2)
-Option(null).orElse(Option(3))           // Some(3)
+Some(2).orElse(Option.from(3))        // Some(2)
+None().orElse(Option.from(3))         // Some(3)
 
 // #toString
-Option(2).toString()                     // "Some(2)"
-Option(null).toString()                  // "None"
+Some(2).toString()                    // "Some(2)"
+None().toString()                     // "None"
 ```
 
 ## Fantasyland
@@ -101,11 +104,11 @@ Option[of](3)[chain](_ => Option[of](_ * 2)) // Some(6)
 Option[of](null)[chain](() => Option[of](2)) // None  (known at compile time too!)
 
 // #map
-Option[of](2)[map](_ => _ * 2)               // Option(4)
+Option[of](2)[map](_ => _ * 2)               // Option.from(4)
 Option[of](null)[map](() => 2)               // None  (known at compile time too!)
 
 // #ap
-Option[of](2)[ap](Option[of](_ => _ * 2))    // Option(4)
+Option[of](2)[ap](Option[of](_ => _ * 2))    // Option.from(4)
 Option[of](null)[ap](Option[of](() => 2))    // None  (known at compile time too!)
 ```
 
