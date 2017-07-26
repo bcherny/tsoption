@@ -5,7 +5,7 @@
 [mit]: https://img.shields.io/npm/l/tsoption.svg?style=flat-square
 [fantasy]: https://img.shields.io/badge/fantasyland-Monad-ff4ba4.svg?style=flat-square
 
-> Correct, easy to use Option type for TypeScript. Like Scala options, but treats Some(null) as None, because TypeScript can. See the [introductory blog post](https://performancejs.com/post/ewff3hj/Options-in-TypeScript).
+> Correct, easy to use Option type for TypeScript. Like Scala options; see the [introductory blog post](https://performancejs.com/post/ewff3hj/Options-in-TypeScript).
 
 ## Installation
 
