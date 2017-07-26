@@ -59,7 +59,7 @@ Some(2).isEmpty()                     // false (known at compile time too!)
 None().isEmpty()                      // true  (known at compile time too!)
 
 // #map
-Some(2).map(_ => _ * 2)               // Option.from(4)
+Some(2).map(_ => _ * 2)               // Some(4)
 None().map(() => 2)                   // None  (known at compile time too!)
 
 // #nonEmpty
@@ -104,11 +104,11 @@ Option[of](3)[chain](_ => Option[of](_ * 2)) // Some(6)
 Option[of](null)[chain](() => Option[of](2)) // None  (known at compile time too!)
 
 // #map
-Option[of](2)[map](_ => _ * 2)               // Option.from(4)
+Option[of](2)[map](_ => _ * 2)               // Some(4)
 Option[of](null)[map](() => 2)               // None  (known at compile time too!)
 
 // #ap
-Option[of](2)[ap](Option[of](_ => _ * 2))    // Option.from(4)
+Option[of](2)[ap](Option[of](_ => _ * 2))    // Some(4)
 Option[of](null)[ap](Option[of](() => 2))    // None  (known at compile time too!)
 ```
 

@@ -1,6 +1,6 @@
 {
   "name": "tsoption",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Correct, easy to use Option type for TypeScript",
   "keywords": [
     "option",
@@ -27,11 +27,11 @@
   "author": "Boris Cherny <boris@performancejs.com> (https://performancejs.com)",
   "license": "MIT",
   "devDependencies": {
-    "ava": "^0.20.0",
+    "ava": "^0.21.0",
     "concurrently": "^3.5.0",
     "fantasy-land": "^3.3.0",
     "tslint": "^5.5.0",
-    "typescript": "^2.4.1"
+    "typescript": "^2.4.2"
   },
   "dependencies": {}
 }
