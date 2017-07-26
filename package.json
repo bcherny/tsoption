@@ -1,6 +1,6 @@
 {
   "name": "tsoption",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Correct, easy to use Option type for TypeScript",
   "keywords": [
     "option",
@@ -20,7 +20,7 @@
   },
   "scripts": {
     "build": "npm run clean && npm run lint && tsc -d",
-    "clean": "rm -rf dist",
+    "clean": "rm -f ./index.d.ts ./test.d.ts ./*.js.map ./*.js",
     "lint": "tslint .",
     "prepublish": "npm test",
     "pretest": "npm run build",
