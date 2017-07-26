@@ -1,6 +1,6 @@
 {
   "name": "tsoption",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Correct, easy to use Option type for TypeScript",
   "keywords": [
     "option",
@@ -13,6 +13,11 @@
     "safe"
   ],
   "main": "index.js",
+  "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bcherny/tsoption.git"
+  },
   "scripts": {
     "build": "npm run clean && npm run lint && tsc -d",
     "clean": "rm -rf dist",
