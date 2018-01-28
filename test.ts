@@ -1,7 +1,7 @@
 import { AssertContext, test } from 'ava'
 import * as fl from 'fantasy-land'
 import { Option, None, Some } from './'
-const {ap, chain, map, of} = fl
+const { ap, chain, map, of } = fl
 
 test('one', t =>
   t.is(Some(3)
@@ -80,11 +80,12 @@ test('Some:apply:composition', t => {
 test('None:apply:composition', t => {
   type N = (_: number) => number
   let a = Option.from<N>(_ => _ * 7)
-  let v = Option.from(null)
+  let v = Option.from<number>(null)
   let u = Option.from<N>(_ => _ % 5)
   let z = a[map]((f: N) => (g: N): ((x: number) => number) => (x: number): number => f(g(x)))
+  let af = u[ap](z)
   is(t)(
-    v[ap](u[ap](z)),
+    v[ap](af),
     v[ap](u)[ap](a)
   )
 })

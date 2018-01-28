@@ -10,7 +10,11 @@
 ## Installation
 
 ```sh
-npm i tsoption -S
+# Using Yarn:
+yarn add tsoption
+
+# Or, using NPM:
+npm install tsoption --save
 ```
 
 ## Usage
@@ -32,6 +36,8 @@ let b = Option.from('a')              // Some<string>('a')
 
 ## API
 
+*Note: The types of each of the expressions below are known at compile time.*
+
 ```ts
 // Create an option
 Option.from(3)                        // Some(3)
@@ -44,7 +50,7 @@ None()                                // None
 
 // #flatMap
 Some(3).flatMap(_ => Some(_ * 2))     // Some(6)
-None().flatMap(() => Some(2))         // None  (known at compile time too!)
+None().flatMap(() => Some(2))         // None
 
 // #get
 Some(3).get()                         // 3
@@ -56,14 +62,14 @@ None().getOrElse(2)                   // 2
 
 // #isEmpty
 Some(2).isEmpty()                     // false (known at compile time too!)
-None().isEmpty()                      // true  (known at compile time too!)
+None().isEmpty()                      // true (known at compile time too!)
 
 // #map
 Some(2).map(_ => _ * 2)               // Some(4)
-None().map(() => 2)                   // None  (known at compile time too!)
+None().map(() => 2)                   // None (known at compile time too!)
 
 // #nonEmpty
-Some(2).nonEmpty()                    // true  (known at compile time too!)
+Some(2).nonEmpty()                    // true (known at compile time too!)
 None().nonEmpty()                     // false (known at compile time too!)
 
 // #orElse

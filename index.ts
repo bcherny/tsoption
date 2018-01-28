@@ -55,9 +55,9 @@ export interface None<T> extends MonadNone<T> {
   flatMap<U = T>(f: (value: T) => Some<U>): None<T>
   flatMap<U = T>(f: (value: T) => None<U>): None<T>
   getOrElse<U extends T>(def: U): U
-  isEmpty(): this is None<T>
+  isEmpty(): this is None<T> & true
   map<U = T>(f: (value: T) => U): None<U>
-  nonEmpty(): this is Some<T>
+  nonEmpty(): this is Some<T> & false
   orElse<U extends T>(alternative: None<U>): None<T>
   orElse<U extends T>(alternative: Some<U>): Some<U>
   toString(): string
@@ -68,9 +68,9 @@ export interface Some<T> extends MonadSome<T> {
   flatMap<U = T>(f: (value: T) => None<U>): None<T>
   get(): T
   getOrElse<U extends T>(def: U): T
-  isEmpty(): this is None<T>
+  isEmpty(): this is None<T> & false
   map<U = T>(f: (value: T) => U): Some<U>
-  nonEmpty(): this is Some<T>
+  nonEmpty(): this is Some<T> & true
   orElse<U extends T>(alternative: None<U>): Some<T>
   orElse<U extends T>(alternative: Some<U>): Some<U>
   toString(): string
