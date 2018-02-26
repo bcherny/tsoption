@@ -1,6 +1,6 @@
 {
   "name": "tsoption",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Correct, easy to use Option type for TypeScript",
   "keywords": [
     "adt",
