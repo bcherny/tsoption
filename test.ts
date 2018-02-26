@@ -152,7 +152,7 @@ test('Some:monad:left identity', t => {
   )
 })
 test('None:monad:left identity', t => {
-  let f = (_: number | null) => Option.from(null)
+  let f = (_: number | null) => Option.from<null>(null)
   is(t)(
     Option[of](null)[chain](f),
     f(null)
