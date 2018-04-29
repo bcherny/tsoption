@@ -11,8 +11,7 @@ export interface FunctorSome<T> {
 /** @see https://github.com/fantasyland/fantasy-land#chain */
 export interface ChainNone<T> {
   /* alias for flatMap */
-  'fantasy-land/chain'<U = T>(f: (value: T) => Some<U>): None<T>
-  'fantasy-land/chain'<U = T>(f: (value: T) => None<U>): None<T>
+  'fantasy-land/chain'<U = T>(f: (value: T) => Option<U>): None<T>
 }
 
 /** @see https://github.com/fantasyland/fantasy-land#chain */
@@ -26,23 +25,12 @@ export interface ChainSome<T> {
 /** @see https://github.com/fantasyland/fantasy-land#applicative */
 export interface ApplicativeNone<T> {
   'fantasy-land/ap'(a: Some<(v: T) => T>): None<T>
-  constructor: {
-    'fantasy-land/of': typeof None
-  }
 }
 
 /** @see https://github.com/fantasyland/fantasy-land#apply */
 /** @see https://github.com/fantasyland/fantasy-land#applicative */
 export interface ApplicativeSome<T> {
   'fantasy-land/ap'(a: Some<(v: T) => T>): Some<T>
-  constructor: {
-    'fantasy-land/of': typeof Some
-  }
-}
-
-/** @see https://github.com/fantasyland/fantasy-land#applicative */
-export interface ApplicativeStatic {
-  'fantasy-land/of': typeof Some
 }
 
 /** @see https://github.com/fantasyland/fantasy-land#monad */
@@ -51,98 +39,127 @@ export interface MonadNone<T> extends ApplicativeNone<T>, FunctorNone<T>, ChainN
 /** @see https://github.com/fantasyland/fantasy-land#monad */
 export interface MonadSome<T> extends ApplicativeSome<T>, FunctorSome<T>, ChainSome<T> {}
 
-export interface None<T> extends MonadNone<T> {
+export class None<T> implements MonadNone<T> {
+
   flatMap<U = T>(f: (value: T) => Some<U>): None<T>
   flatMap<U = T>(f: (value: T) => None<U>): None<T>
-  getOrElse<U extends T>(def: U): U
-  isEmpty(): this is None<T> & true
-  map<U = T>(f: (value: T) => U): None<U>
-  nonEmpty(): this is Some<T> & false
+  flatMap<U>(_f: (value: T) => Option<U>) {
+    return this
+  }
+  getOrElse<U extends T>(def: U) {
+    return def
+  }
+  isEmpty() {
+    return true
+  }
+  map<U>(_f: (value: T) => U) { return this }
+  nonEmpty(): this is Some<T> & false { return false }
+
   orElse<U extends T>(alternative: None<U>): None<T>
   orElse<U extends T>(alternative: Some<U>): Some<U>
-  toString(): string
+  orElse<U extends T>(alternative: Some<U> | None<U>): None<T> | Some<U> {
+    if (alternative.nonEmpty()) {
+      return alternative
+    }
+    return this
+  }
+  toString() {
+    return 'None'
+  }
+
+  // fantasyland
+  'fantasy-land/ap'(_a: Some<(v: T) => T>) {
+    return this
+  }
+  'fantasy-land/chain'<U = T>(f: (value: T) => Option<U>): None<T>
+  'fantasy-land/chain'<U>(_f: (value: T) => Option<U>): None<T> {
+    return this
+  }
+  'fantasy-land/map'<U = T>(_f: (value: T) => U): None<U> {
+    return new None<U>()
+  }
+
+  static 'fantasy-land/of'<T>() {
+    return new None<T>()
+  }
 }
 
-export interface Some<T> extends MonadSome<T> {
+export class Some<T> implements MonadSome<T> {
+
+  constructor(private value: T) {}
+
+  map<U>(f: (value: T) => U) {
+    return new Some(f(this.value))
+  }
+
   flatMap<U = T>(f: (value: T) => Some<U>): Some<U>
-  flatMap<U = T>(f: (value: T) => None<U>): None<T>
-  get(): T
-  getOrElse<U extends T>(def: U): T
-  isEmpty(): this is None<T> & false
-  map<U = T>(f: (value: T) => U): Some<U>
-  nonEmpty(): this is Some<T> & true
+  flatMap<U = T>(f: (value: T) => None<U>): None<U>
+  flatMap<U>(f: (value: T) => Some<U> | None<U>) {
+    return f(this.value)
+  }
+  get() { return this.value }
+  getOrElse<U extends T>(def: U): T | U {
+    return this.value || def
+  }
+  isEmpty(): this is None<T> & false {
+    return false
+  }
+  nonEmpty(): this is Some<T> & true {
+    return true
+  }
+
   orElse<U extends T>(alternative: None<U>): Some<T>
   orElse<U extends T>(alternative: Some<U>): Some<U>
-  toString(): string
-}
-
-export type Option<T> = Some<T> | None<T>
-
-export function None<T>(): None<T> {
-
-  let flatMap = <U>(_f: (value: T) => Option<U>): None<U> => None<U>()
-  let map = <U>(_f: (value: T) => U): any => none
-
-  let none: None<T> = {
-    flatMap,
-    getOrElse: <U extends T>(def: U) => def,
-    isEmpty: () => true,
-    map,
-    nonEmpty: () => false,
-    orElse: <U extends T>(alternative: Option<U>): any => alternative,
-    toString: () => 'None',
-
-    // fantasyland
-    constructor: {
-      'fantasy-land/of': None
-    },
-    'fantasy-land/ap': (_a: Some<(v: T) => T>): any => none,
-    'fantasy-land/chain': flatMap,
-    'fantasy-land/map': map
+  orElse<U extends T>(_alternative: Option<U>) {
+    return this
   }
 
-  return none
-}
-
-export function Some<T>(value: T): Some<T> {
-
-  let flatMap = <U>(f: (value: T) => Option<U>): any => f(value)
-  let map = <U>(f: (value: T) => U): any => Some(f(value))
-
-  let some: Some<T> = {
-    flatMap,
-    get: () => value,
-    getOrElse: <U extends T>(def: U): T | U  => value || def,
-    isEmpty: () => false,
-    map,
-    nonEmpty: () => true,
-    orElse: <U extends T>(_alternative: Option<U>): any => Some(value),
-    toString: () => `Some(${value})`,
-
-    // fantasyland
-    constructor: {
-      'fantasy-land/of': Some
-    },
-    'fantasy-land/ap': (a: Some<(v: T) => T>): any => Some(a.get()(value)),
-    'fantasy-land/chain': flatMap,
-    'fantasy-land/map': map
+  toString() {
+    return `Some(${this.value})`
   }
 
-  return some
+  // fantasyland
+  static 'fantasy-land/of'<T>(value: T) {
+    return new Some(value)
+  }
+  'fantasy-land/ap'(a: Some<(v: T) => T>) {
+    return new Some(a.get()(this.value))
+  }
+
+  'fantasy-land/chain'<U = T>(f: (value: T) => Some<U>): Some<U>
+  'fantasy-land/chain'<U = T>(f: (value: T) => None<U>): None<T>
+  'fantasy-land/chain'<U>(f: (value: T) => Some<U> | None<U>): Some<U> | None<U> {
+    return this.flatMap(f)
+  }
+  'fantasy-land/map'<U>(f: (value: T) => U) {
+    return this.map(f)
+  }
 }
 
-export interface OptionStatic {
-  'fantasy-land/of': typeof Some
-  'fantasy-land/empty'<T>(): None<T>
-  'fantasy-land/zero'<T>(): None<T>
-  from<T = {}>(value: null | undefined): None<T>
-  from<T>(value: T): Some<T>
-}
+export abstract class Option<T> {
 
-export const Option: OptionStatic = {
-  'fantasy-land/of': Some,
-  'fantasy-land/empty': <T>() => None<T>(),
-  'fantasy-land/zero': <T>() => None<T>(),
-  from: <T>(value: T | null | undefined): any =>
-    value == null ? None<T>() : Some<T>(value)
+  abstract flatMap<U>(f: (value: T) => Option<U>): Option<U>
+  abstract getOrElse<U extends T>(def: U): T | U
+  abstract isEmpty(): boolean
+  abstract map<U>(f: (value: T) => U): Option<U>
+  abstract nonEmpty(): boolean
+  abstract orElse<U extends T>(alternative: Option<U>): Option<T> | Option<U>
+  abstract toString(): string
+
+  static from<T = {}>(value: null | undefined): None<T>
+  static from<T>(value: T): Some<T>
+  static from<T>(value: T | null | undefined) {
+    return value == null ? new None<T>() : new Some<T>(value)
+  }
+
+  // fantasyland
+  static 'fantasy-land/of'<T>(value: T) {
+    return new Some(value)
+  }
+  static 'fantasy-land/empty'<T>() {
+    return new None<T>()
+  }
+  static 'fantasy-land/zero'<T>() {
+    return new None<T>()
+  }
 }

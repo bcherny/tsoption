@@ -4,18 +4,34 @@ import { Option, None, Some } from './'
 const { ap, chain, map, of } = fl
 
 test('one', t =>
-  t.is(Some(3)
-    .flatMap(() => Some(5))
+  t.is(new Some(3)
+    .flatMap(() => new Some(5))
     .map(() => 'a')
-    .orElse(Some('b'))
+    .orElse(new Some('b'))
     .getOrElse('c'), 'a'))
 
 test('two', t => t.is(Option.from('a')
-  .flatMap(() => None())
+  .flatMap(() => new None())
   .orElse(Option.from('b'))
   .map(() => 'c')
   .orElse(Option.from('d'))
   .getOrElse('e'), 'c'))
+
+test('three', t => {
+  function foo(bar: any): Option<boolean> {
+    return Option.from(Option.from(bar).isEmpty())
+  }
+  let a = foo('abcd').map(s => s.toString())
+  t.is(a.getOrElse('bad'), 'false')
+})
+
+test('four', t => {
+  t.plan(1)
+  function foo(x: Option<boolean>) {
+    t.is(x.getOrElse(false).toString(), 'true')
+  }
+  foo(Option.from(true))
+})
 
 test('Some#flatMap', t => t.is(Option.from(3).flatMap(_ => Option.from(_ * 2)).get(), 6))
 test('Some#flatMap', t => t.is(Option.from(null).flatMap(() => Option.from(2)).isEmpty(), true))
