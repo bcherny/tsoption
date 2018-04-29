@@ -108,7 +108,9 @@ test('None:apply:composition', t => {
 
 test('Some:applicative:identity', t => {
   let a = Option.from(1)
-  is(t)(a[ap](Option[of]((_: number) => _)), a)
+  let b = Some[of]((_: number) => _)
+  let c = a[ap](b)
+  is(t)(c, a)
 })
 test('None:applicative:identity', t => {
   let a = Option.from<number>(null)
@@ -177,7 +179,7 @@ test('None:monad:left identity', t => {
 
 test('Some:monad:right identity', t => {
   is(t)(
-    Option.from(1)[chain](Option[of]),
+    Option.from(1)[chain](Some[of]),
     Option.from(1)
   )
 })
