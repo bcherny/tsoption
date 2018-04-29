@@ -31,7 +31,7 @@
   "scripts": {
     "build": "npm run clean && npm run lint && tsc -d",
     "clean": "rm -f ./index.d.ts ./test.d.ts ./*.js.map ./*.js",
-    "lint": "tslint *.ts",
+    "lint": "tslint -p ./tsconfig.json *.ts",
     "prepublish": "npm test",
     "pretest": "npm run build",
     "tdd": "npm run clean && concurrently -k 'npm run test:watch' 'npm run watch'",
@@ -46,7 +46,7 @@
     "concurrently": "^3.5.1",
     "fantasy-land": "^3.5.0",
     "tslint": "^5.9.1",
-    "typescript": "^2.7.2"
+    "typescript": "^2.8.3"
   },
   "dependencies": {}
 }
