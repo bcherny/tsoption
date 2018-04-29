@@ -49,9 +49,9 @@ export abstract class Option<T> {
   abstract orElse<U extends T>(alternative: Option<U>): Option<T> | Option<U>
   abstract toString(): string
 
-  static from<T = {}>(value: null | undefined): None<T>
-  static from<T>(value: T): Some<T>
-  static from<T>(value: T | null | undefined): Option<T> {
+  static of<T = {}>(value?: null | undefined): None<T>
+  static of<T>(value?: T): Some<T>
+  static of<T>(value?: T | null | undefined): Option<T> {
     return value == null ? new None<T>() : new Some<T>(value)
   }
 
@@ -124,8 +124,8 @@ export class Some<T> extends Option<T> implements MonadSome<T> {
   }
 
   flatMap<U = T>(f: (value: T) => Some<U>): Some<U>
-  flatMap<U = T>(f: (value: T) => None<U>): None<U>
-  flatMap<U = T>(f: (value: T) => Option<U>): Option<U> {
+  flatMap<U = T>(f: (value: T) => None<U>): None<T>
+  flatMap<U = T>(f: (value: T) => Option<U>): Option<T> | Option<U> {
     return f(this.value)
   }
 

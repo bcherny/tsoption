@@ -10,16 +10,16 @@ test('one', t =>
     .orElse(new Some('b'))
     .getOrElse('c'), 'a'))
 
-test('two', t => t.is(Option.from('a')
+test('two', t => t.is(Option.of('a')
   .flatMap(() => new None())
-  .orElse(Option.from('b'))
+  .orElse(Option.of('b'))
   .map(() => 'c')
-  .orElse(Option.from('d'))
+  .orElse(Option.of('d'))
   .getOrElse('e'), 'c'))
 
 test('three', t => {
   function foo(bar: any): Option<boolean> {
-    return Option.from(Option.from(bar).isEmpty())
+    return Option.of(Option.of(bar).isEmpty())
   }
   let a = foo('abcd').map(s => s.toString())
   t.is(a.getOrElse('bad'), 'false')
@@ -30,53 +30,53 @@ test('four', t => {
   function foo(x: Option<boolean>) {
     t.is(x.getOrElse(false).toString(), 'true')
   }
-  foo(Option.from(true))
+  foo(Option.of(true))
 })
 
-test('Some#flatMap', t => t.is(Option.from(3).flatMap(_ => Option.from(_ * 2)).get(), 6))
-test('Some#flatMap', t => t.is(Option.from(null).flatMap(() => Option.from(2)).isEmpty(), true))
+test('Some#flatMap', t => t.is(Option.of(3).flatMap(_ => Option.of(_ * 2)).get(), 6))
+test('Some#flatMap', t => t.is(Option.of(null).flatMap(() => Option.of(2)).isEmpty(), true))
 
-test('Some#get', t => t.is(Option.from(3).get(), 3))
+test('Some#get', t => t.is(Option.of(3).get(), 3))
 
-test('Some#getOrElse', t => t.is(Option.from(1).getOrElse(3), 1))
-test('None#getOrElse', t => t.is(Option.from(null).getOrElse(3), 3))
+test('Some#getOrElse', t => t.is(Option.of(1).getOrElse(3), 1))
+test('None#getOrElse', t => t.is(Option.of(null).getOrElse(3), 3))
 
-test('Some#isEmpty', t => t.is(Option.from(3).isEmpty(), false))
-test('None#isEmpty (1)', t => t.is(Option.from(null).isEmpty(), true))
-test('None#isEmpty (2)', t => t.is(Option.from(undefined).isEmpty(), true))
+test('Some#isEmpty', t => t.is(Option.of(3).isEmpty(), false))
+test('None#isEmpty (1)', t => t.is(Option.of(null).isEmpty(), true))
+test('None#isEmpty (2)', t => t.is(Option.of(undefined).isEmpty(), true))
 
-test('Some#map', t => t.is(Option.from(3).map(() => 4).getOrElse(5), 4))
-test('None#map', t => t.is(Option.from(null).map(() => 4).getOrElse(5), 5))
+test('Some#map', t => t.is(Option.of(3).map(() => 4).getOrElse(5), 4))
+test('None#map', t => t.is(Option.of(null).map(() => 4).getOrElse(5), 5))
 
-test('Some#nonEmpty', t => t.is(Option.from(3).nonEmpty(), true))
-test('None#nonEmpty (1)', t => t.is(Option.from(null).nonEmpty(), false))
-test('None#nonEmpty (2)', t => t.is(Option.from(undefined).nonEmpty(), false))
+test('Some#nonEmpty', t => t.is(Option.of(3).nonEmpty(), true))
+test('None#nonEmpty (1)', t => t.is(Option.of(null).nonEmpty(), false))
+test('None#nonEmpty (2)', t => t.is(Option.of(undefined).nonEmpty(), false))
 
-test('Some#orElse', t => t.is(Option.from(2).orElse(Option.from(3)).get(), 2))
-test('None#orElse', t => t.is(Option.from(null).orElse(Option.from(3)).get(), 3))
+test('Some#orElse', t => t.is(Option.of(2).orElse(Option.of(3)).get(), 2))
+test('None#orElse', t => t.is(Option.of(null).orElse(Option.of(3)).get(), 3))
 
-test('Some#toString', t => t.is(Option.from(3) + '', 'Some(3)'))
-test('None#toString', t => t.is(Option.from(null) + '', 'None'))
+test('Some#toString', t => t.is(Option.of(3) + '', 'Some(3)'))
+test('None#toString', t => t.is(Option.of(null) + '', 'None'))
 
 // fantasyland laws
 
 test('Some:functor:identity', t => {
-  let option = Option.from({})
+  let option = Option.of({})
   is(t)(option[map](_ => _), option)
 })
 test('None:functor:identity', t => {
-  let option = Option.from(null)
+  let option = Option.of(null)
   is(t)(option[map](_ => _), option)
 })
 
 test('Some:functor:composition', t => {
-  let option = Option.from(1)
+  let option = Option.of(1)
   let f = (_: number) => _ * 7
   let g = (_: number) => _ % 5
   is(t)(option[map](_ => f(g(_))), option[map](g)[map](f))
 })
 test('None:functor:composition', t => {
-  let option = Option.from<number>(null)
+  let option = Option.of<number>(null)
   let f = (_: number) => _ * 7
   let g = (_: number) => _ % 5
   is(t)(option[map](_ => f(g(_))), option[map](g)[map](f))
@@ -84,9 +84,9 @@ test('None:functor:composition', t => {
 
 test('Some:apply:composition', t => {
   type N = (_: number) => number
-  let a = Option.from<N>(_ => _ * 7)
-  let v = Option.from(2)
-  let u = Option.from<N>(_ => _ % 5)
+  let a = Option.of<N>(_ => _ * 7)
+  let v = Option.of(2)
+  let u = Option.of<N>(_ => _ % 5)
   let z = a[map]((f: N) => (g: N): ((x: number) => number) => (x: number): number => f(g(x)))
   is(t)(
     v[ap](u[ap](z)),
@@ -95,9 +95,9 @@ test('Some:apply:composition', t => {
 })
 test('None:apply:composition', t => {
   type N = (_: number) => number
-  let a = Option.from<N>(_ => _ * 7)
-  let v = Option.from<number>(null)
-  let u = Option.from<N>(_ => _ % 5)
+  let a = Option.of<N>(_ => _ * 7)
+  let v = Option.of<number>(null)
+  let u = Option.of<N>(_ => _ % 5)
   let z = a[map]((f: N) => (g: N): ((x: number) => number) => (x: number): number => f(g(x)))
   let af = u[ap](z)
   is(t)(
@@ -107,13 +107,13 @@ test('None:apply:composition', t => {
 })
 
 test('Some:applicative:identity', t => {
-  let a = Option.from(1)
+  let a = Option.of(1)
   let b = Some[of]((_: number) => _)
   let c = a[ap](b)
   is(t)(c, a)
 })
 test('None:applicative:identity', t => {
-  let a = Option.from<number>(null)
+  let a = Option.of<number>(null)
   is(t)(a[ap](Option[of]((_: number) => _)), a)
 })
 
@@ -135,7 +135,7 @@ test('None:applicative:homomorphism', t => {
 test('Some:applicative:interchange', t => {
   type N = (_: number) => number
   let y = 1
-  let u = Option.from<N>(_ => _ * 7)
+  let u = Option.of<N>(_ => _ * 7)
   let s = Option[of]((f: N) => f(y))
   is(t)(
     Option[of](y)[ap](u),
@@ -144,18 +144,18 @@ test('Some:applicative:interchange', t => {
 })
 
 test('Some:chain:associativity', t => {
-  let option = Option.from(1)
-  let f = (_: number) => Option.from(_ * 7)
-  let g = (_: number) => Option.from(_ % 5)
+  let option = Option.of(1)
+  let f = (_: number) => Option.of(_ * 7)
+  let g = (_: number) => Option.of(_ % 5)
   is(t)(
     option[chain](f)[chain](g),
     option[chain](x => f(x)[chain](g))
   )
 })
 test('None:chain:associativity', t => {
-  let option = Option.from<number>(null)
-  let f = (_: number) => Option.from(_ * 7)
-  let g = (_: number) => Option.from(_ % 5)
+  let option = Option.of<number>(null)
+  let f = (_: number) => Option.of(_ * 7)
+  let g = (_: number) => Option.of(_ % 5)
   is(t)(
     option[chain](f)[chain](g),
     option[chain](x => f(x)[chain](g))
@@ -163,14 +163,14 @@ test('None:chain:associativity', t => {
 })
 
 test('Some:monad:left identity', t => {
-  let f = (_: number) => Option.from(_ * 7)
+  let f = (_: number) => Option.of(_ * 7)
   is(t)(
     Option[of](1)[chain](f),
     f(1)
   )
 })
 test('None:monad:left identity', t => {
-  let f = (_: number | null) => Option.from<null>(null)
+  let f = (_: number | null) => Option.of<null>(null)
   is(t)(
     Option[of](null)[chain](f),
     f(null)
@@ -179,14 +179,14 @@ test('None:monad:left identity', t => {
 
 test('Some:monad:right identity', t => {
   is(t)(
-    Option.from(1)[chain](Some[of]),
-    Option.from(1)
+    Option.of(1)[chain](Some[of]),
+    Option.of(1)
   )
 })
 test('None:monad:right identity', t => {
   is(t)(
-    Option.from(null)[chain](Option[of]),
-    Option.from(null)
+    Option.of(null)[chain](Option[of]),
+    Option.of(null)
   )
 })
 
