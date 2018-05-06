@@ -41,10 +41,10 @@ export interface MonadSome<T> extends ApplicativeSome<T>, FunctorSome<T>, ChainS
 
 export abstract class Option<T> {
 
-  abstract flatMap<U>(f: (value: T) => Option<U>): Option<T> | Option<U>
+  abstract flatMap<U>(f: (value: T) => Option<U>): Option<U>
   abstract getOrElse<U extends T>(def: U): T | U
   abstract isEmpty(): this is None<T>
-  abstract map<U>(f: (value: T) => U): Option<T> | Option<U>
+  abstract map<U>(f: (value: T) => U): Option<U>
   abstract nonEmpty(): this is Some<T>
   abstract orElse<U extends T>(alternative: Option<U>): Option<T> | Option<U>
   abstract toString(): string
@@ -124,8 +124,9 @@ export class Some<T> extends Option<T> implements MonadSome<T> {
   }
 
   flatMap<U = T>(f: (value: T) => Some<U>): Some<U>
-  flatMap<U = T>(f: (value: T) => None<U>): None<T>
-  flatMap<U = T>(f: (value: T) => Option<U>): Option<T> | Option<U> {
+  flatMap<U = T>(f: (value: T) => None<U>): None<U>
+  flatMap<U = T>(f: (value: T) => Option<U>): Option<U>
+  flatMap<U = T>(f: (value: T) => Option<U>): Option<U> {
     return f(this.value)
   }
 

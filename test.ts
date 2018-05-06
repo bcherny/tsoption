@@ -26,6 +26,14 @@ test('three', t => {
 })
 
 test('four', t => {
+  function a(): Option<string> {
+    return Some.of('a')
+  }
+  let b: Option<string> = Some.of('b')
+  t.is(Option.of(1).flatMap(a).orElse(b).getOrElse('c'), 'a')
+})
+
+test('four', t => {
   t.plan(1)
   function foo(x: Option<boolean>) {
     t.is(x.getOrElse(false).toString(), 'true')
