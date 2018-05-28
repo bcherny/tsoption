@@ -42,7 +42,8 @@ export interface MonadSome<T> extends ApplicativeSome<T>, FunctorSome<T>, ChainS
 export abstract class Option<T> {
 
   abstract flatMap<U>(f: (value: T) => Option<U>): Option<U>
-  abstract getOrElse<U extends T>(def: U): T | U
+  abstract getOr<U extends T>(def: U): T | U
+  abstract getOrElse<U extends T>(f: () => U): T | U
   abstract isEmpty(): this is None<T>
   abstract map<U>(f: (value: T) => U): Option<U>
   abstract nonEmpty(): this is Some<T>
@@ -77,8 +78,11 @@ export class None<T> extends Option<T> implements MonadNone<T> {
   flatMap<U>(_f: (value: T) => Option<U>): None<U> {
     return new None<U>()
   }
-  getOrElse<U extends T>(def: U) {
+  getOr<U extends T>(def: U) {
     return def
+  }
+  getOrElse<U extends T>(f: () => U) {
+    return f()
   }
   isEmpty() {
     return true
@@ -134,11 +138,18 @@ export class Some<T> extends Option<T> implements MonadSome<T> {
     return this.value
   }
 
-  getOrElse<U extends T>(def: U): T | U {
+  getOr<U extends T>(def: U): T | U {
     return (
       this.value == null ||
       (typeof this.value === 'number' && isNaN(this.value))
     ) ? def : this.value
+  }
+
+  getOrElse<U extends T>(fn: () => U): T | U {
+    return (
+      this.value == null ||
+      (typeof this.value === 'number' && isNaN(this.value))
+    ) ? fn() : this.value
   }
 
   isEmpty(): this is None<T> & false {
