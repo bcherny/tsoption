@@ -47,6 +47,8 @@ test('Some#flatMap', t => t.is(Option.of(null).flatMap(() => Option.of(2)).isEmp
 test('Some#get', t => t.is(Option.of(3).get(), 3))
 
 test('Some#getOrElse', t => t.is(Option.of(1).getOrElse(3), 1))
+test('Some(0)#getOrElse', t => t.is(Option.of(0).getOrElse(12), 0))
+test('Some(false)#getOrElse', t => t.is(Option.of(false).getOrElse(true), false))
 test('None#getOrElse', t => t.is(Option.of(null).getOrElse(3), 3))
 
 test('Some#isEmpty', t => t.is(Option.of(3).isEmpty(), false))
