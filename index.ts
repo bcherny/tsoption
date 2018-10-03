@@ -135,7 +135,10 @@ export class Some<T> extends Option<T> implements MonadSome<T> {
   }
 
   getOrElse<U extends T>(def: U): T | U {
-    return this.value == null ? def : this.value
+    return (
+      this.value == null ||
+      (typeof this.value === 'number' && isNaN(this.value))
+    ) ? def : this.value
   }
 
   isEmpty(): this is None<T> & false {
