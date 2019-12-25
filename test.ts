@@ -7,22 +7,22 @@ test('one', t =>
   t.is(new Some(3)
     .flatMap(() => new Some(5))
     .map(() => 'a')
-    .orElse(new Some('b'))
-    .getOrElse('c'), 'a'))
+    .or(new Some('b'))
+    .getOr('c'), 'a'))
 
 test('two', t => t.is(Option.of('a')
   .flatMap(() => new None())
-  .orElse(Option.of('b'))
+  .or(Option.of('b'))
   .map(() => 'c')
-  .orElse(Option.of('d'))
-  .getOrElse('e'), 'c'))
+  .or(Option.of('d'))
+  .getOr('e'), 'c'))
 
 test('three', t => {
   function foo(bar: any): Option<boolean> {
     return Option.of(Option.of(bar).isEmpty())
   }
   let a = foo('abcd').map(s => s.toString())
-  t.is(a.getOrElse('bad'), 'false')
+  t.is(a.getOr('bad'), 'false')
 })
 
 test('four', t => {
@@ -30,15 +30,65 @@ test('four', t => {
     return Some.of('a')
   }
   let b: Option<string> = Some.of('b')
-  t.is(Option.of(1).flatMap(a).orElse(b).getOrElse('c'), 'a')
+  t.is(Option.of(1).flatMap(a).or(b).getOr('c'), 'a')
 })
 
-test('four', t => {
+test('five', t => {
   t.plan(1)
   function foo(x: Option<boolean>) {
-    t.is(x.getOrElse(false).toString(), 'true')
+    t.is(x.getOr(false).toString(), 'true')
   }
   foo(Option.of(true))
+})
+
+test('six', t => {
+  t.plan(3)
+  function foo(x: Option<string>): Option<number> {
+    return x.map(s => s.length)
+  }
+  t.is(foo(Option.of('abcd')).getOr(0), 4)
+  t.is(foo(Option.of(null)).getOrElse(() => 2), 2)
+  t.throws(() => {
+    Option.of(null).getOrElse(() => { throw new Error('No value') })
+  }, 'No value')
+})
+
+interface IFoo {
+  foo?: string
+}
+
+interface IBar extends IFoo {
+  bar?: string
+}
+
+test('seven (getOr with subtype)', t => {
+  t.plan(1)
+  function foo(x: IFoo[]): number {
+      return x.length
+  }
+  const arr: IBar[] = []
+  t.is(foo(Option.of(null).getOr(arr)), 0)
+})
+
+test('eight (getOrElse with subtype)', t => {
+  t.plan(1)
+  function foo(x: IFoo[]): number {
+      return x.length
+  }
+  const arr: IBar[] = []
+  t.is(foo(Option.of(null).getOrElse(() => arr)), 0)
+})
+
+test('nine', t => {
+  t.plan(3)
+  function foo(x: Option<string>): Option<number> {
+    return x.map(s => s.length)
+  }
+  t.is(foo(Option.of('abcd')).or(Option.of(0)).getOr(1), 4)
+  t.is(foo(Option.of(null)).orElse(() => Option.of(2)).getOr(1), 2)
+  t.throws(() => {
+    Option.of(null).orElse(() => { throw new Error('No value') })
+  }, 'No value')
 })
 
 test('Some#flatMap', t => t.is(Option.of(3).flatMap(_ => Option.of(_ * 2)).get(), 6))
@@ -46,26 +96,34 @@ test('Some#flatMap', t => t.is(Option.of(null).flatMap(() => Option.of(2)).isEmp
 
 test('Some#get', t => t.is(Option.of(3).get(), 3))
 
-test('Some#getOrElse', t => t.is(Option.of(1).getOrElse(3), 1))
-test('Some(0)#getOrElse', t => t.is(Option.of(0).getOrElse(12), 0))
-test('Some(false)#getOrElse', t => t.is(Option.of(false).getOrElse(true), false))
-test('Some("")#getOrElse', t => t.is(Option.of('').getOrElse('Hello'), ''))
-test('Some(NaN)#getOrElse', t => t.is(Option.of(NaN).getOrElse(12), 12))
-test('None#getOrElse', t => t.is(Option.of(null).getOrElse(3), 3))
+test('Some#getOr', t => t.is(Option.of(1).getOr(3), 1))
+test('Some(0)#getOr', t => t.is(Option.of(0).getOr(12), 0))
+test('Some(false)#getOr', t => t.is(Option.of(false).getOr(true), false))
+test('Some("")#getOr', t => t.is(Option.of('').getOr('Hello'), ''))
+test('Some(NaN)#getOr', t => t.is(Option.of(NaN).getOr(12), 12))
+test('Some#getOr', t => t.is(Option.of(1).getOr(3), 1))
+test('None#getOr', t => t.is(Option.of(null).getOr(3), 3))
+
+test('Some#getOrElse', t => t.is(Option.of(1).getOrElse(() => 3), 1))
+test('Some(0)#getOrElse', t => t.is(Option.of(0).getOrElse(() => 12), 0))
+test('Some(false)#getOrElse', t => t.is(Option.of(false).getOrElse(() => true), false))
+test('Some("")#getOrElse', t => t.is(Option.of('').getOrElse(() => 'Hello'), ''))
+test('Some(NaN)#getOrElse', t => t.is(Option.of(NaN).getOrElse(() => 12), 12))
+test('None#getOrElse', t => t.is(Option.of(null).getOrElse(() => 3), 3))
 
 test('Some#isEmpty', t => t.is(Option.of(3).isEmpty(), false))
 test('None#isEmpty (1)', t => t.is(Option.of(null).isEmpty(), true))
 test('None#isEmpty (2)', t => t.is(Option.of(undefined).isEmpty(), true))
 
-test('Some#map', t => t.is(Option.of(3).map(() => 4).getOrElse(5), 4))
-test('None#map', t => t.is(Option.of(null).map(() => 4).getOrElse(5), 5))
+test('Some#map', t => t.is(Option.of(3).map(() => 4).getOr(5), 4))
+test('None#map', t => t.is(Option.of(null).map(() => 4).getOr(5), 5))
 
 test('Some#nonEmpty', t => t.is(Option.of(3).nonEmpty(), true))
 test('None#nonEmpty (1)', t => t.is(Option.of(null).nonEmpty(), false))
 test('None#nonEmpty (2)', t => t.is(Option.of(undefined).nonEmpty(), false))
 
-test('Some#orElse', t => t.is(Option.of(2).orElse(Option.of(3)).get(), 2))
-test('None#orElse', t => t.is(Option.of(null).orElse(Option.of(3)).get(), 3))
+test('Some#or', t => t.is(Option.of(2).or(Option.of(3)).get(), 2))
+test('None#or', t => t.is(Option.of(null).or(Option.of(3)).get(), 3))
 
 test('Some#toString', t => t.is(Option.of(3) + '', 'Some(3)'))
 test('None#toString', t => t.is(Option.of(null) + '', 'None'))
