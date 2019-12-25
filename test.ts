@@ -7,14 +7,14 @@ test('one', t =>
   t.is(new Some(3)
     .flatMap(() => new Some(5))
     .map(() => 'a')
-    .orElse(new Some('b'))
+    .or(new Some('b'))
     .getOr('c'), 'a'))
 
 test('two', t => t.is(Option.of('a')
   .flatMap(() => new None())
-  .orElse(Option.of('b'))
+  .or(Option.of('b'))
   .map(() => 'c')
-  .orElse(Option.of('d'))
+  .or(Option.of('d'))
   .getOr('e'), 'c'))
 
 test('three', t => {
@@ -30,7 +30,7 @@ test('four', t => {
     return Some.of('a')
   }
   let b: Option<string> = Some.of('b')
-  t.is(Option.of(1).flatMap(a).orElse(b).getOr('c'), 'a')
+  t.is(Option.of(1).flatMap(a).or(b).getOr('c'), 'a')
 })
 
 test('five', t => {
@@ -79,6 +79,18 @@ test('eight (getOrElse with subtype)', t => {
   t.is(foo(Option.of(null).getOrElse(() => arr)), 0)
 })
 
+test('nine', t => {
+  t.plan(3)
+  function foo(x: Option<string>): Option<number> {
+    return x.map(s => s.length)
+  }
+  t.is(foo(Option.of('abcd')).or(Option.of(0)).getOr(1), 4)
+  t.is(foo(Option.of(null)).orElse(() => Option.of(2)).getOr(1), 2)
+  t.throws(() => {
+    Option.of(null).orElse(() => { throw new Error('No value') })
+  }, 'No value')
+})
+
 test('Some#flatMap', t => t.is(Option.of(3).flatMap(_ => Option.of(_ * 2)).get(), 6))
 test('Some#flatMap', t => t.is(Option.of(null).flatMap(() => Option.of(2)).isEmpty(), true))
 
@@ -110,8 +122,8 @@ test('Some#nonEmpty', t => t.is(Option.of(3).nonEmpty(), true))
 test('None#nonEmpty (1)', t => t.is(Option.of(null).nonEmpty(), false))
 test('None#nonEmpty (2)', t => t.is(Option.of(undefined).nonEmpty(), false))
 
-test('Some#orElse', t => t.is(Option.of(2).orElse(Option.of(3)).get(), 2))
-test('None#orElse', t => t.is(Option.of(null).orElse(Option.of(3)).get(), 3))
+test('Some#or', t => t.is(Option.of(2).or(Option.of(3)).get(), 2))
+test('None#or', t => t.is(Option.of(null).or(Option.of(3)).get(), 3))
 
 test('Some#toString', t => t.is(Option.of(3) + '', 'Some(3)'))
 test('None#toString', t => t.is(Option.of(null) + '', 'None'))

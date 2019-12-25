@@ -47,7 +47,8 @@ export abstract class Option<T> {
   abstract isEmpty(): this is None<T>
   abstract map<U>(f: (value: T) => U): Option<U>
   abstract nonEmpty(): this is Some<T>
-  abstract orElse<U extends T>(alternative: Option<U>): Option<T> | Option<U>
+  abstract or<U extends T>(alternative: Option<U>): Option<T> | Option<U>
+  abstract orElse<U extends T>(alternative: () => Option<U>): Option<T> | Option<U>
   abstract toString(): string
 
   static of<T = {}>(value?: null | undefined): None<T>
@@ -92,9 +93,19 @@ export class None<T> extends Option<T> implements MonadNone<T> {
   }
   nonEmpty(): this is Some<T> & false { return false }
 
-  orElse<U extends T>(alternative: None<U>): None<T>
-  orElse<U extends T>(alternative: Some<U>): Some<U>
-  orElse<U extends T>(alternative: Some<U> | None<U>): None<T> | Some<U> {
+  or<U extends T>(alternative: None<U>): None<T>
+  or<U extends T>(alternative: Some<U>): Some<U>
+  or<U extends T>(alternative: Some<U> | None<U>): None<T> | Some<U> {
+    if (alternative.nonEmpty()) {
+      return alternative
+    }
+    return this
+  }
+
+  orElse<U extends T>(alternative: () => None<U>): None<T>
+  orElse<U extends T>(alternative: () => Some<U>): Some<U>
+  orElse<U extends T>(alternativeFn: () => Some<U> | None<U>): None<T> | Some<U> {
+    const alternative = alternativeFn()
     if (alternative.nonEmpty()) {
       return alternative
     }
@@ -164,9 +175,15 @@ export class Some<T> extends Option<T> implements MonadSome<T> {
     return true
   }
 
-  orElse<U extends T>(alternative: None<U>): Some<T>
-  orElse<U extends T>(alternative: Some<U>): Some<U>
-  orElse<U extends T>(_alternative: Option<U>) {
+  or<U extends T>(alternative: None<U>): Some<T>
+  or<U extends T>(alternative: Some<U>): Some<U>
+  or<U extends T>(_alternative: Option<U>) {
+    return this
+  }
+
+  orElse<U extends T>(alternative: () => None<U>): Some<T>
+  orElse<U extends T>(alternative: () => Some<U>): Some<U>
+  orElse<U extends T>(_alternative: () => Option<U>) {
     return this
   }
 
